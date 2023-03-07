@@ -10,13 +10,14 @@ app = Flask(__name__)
 
 # making data set a global variable
 data = {}
-
+information = {}
 
 def get_data():
     '''
     This function will get the data set and make it a dictionary that will be called in other functions.
     '''
     global data
+    global information
     data_url = "https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS_OEM/ISS.OEM_J2K_EPH.xml"
     response = requests.get(data_url)
     information = xmltodict.parse(response.text)
