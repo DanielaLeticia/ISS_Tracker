@@ -38,12 +38,29 @@ following command: `curl localhost:5000/help`.
 ## Dockerfile script
 
 The Dockerfile script is a containerization tool that is used for the project in order to make it easier to package and release
-this project. 
+this project. It is a plain text file that when working on conjunction with the docker-compose, will execute the iss tracker file 
+and will be able to be interacted with. The Dockerfile will pip install all of the non-standard python libraries included in this
+project. Some of them include, geopy, requests, xmltodict, and Flask. These are located at the top of the script. The next thing
+included in the Dockerfile is the CMD command. This acts as the command line and will execute the string of commands in the CMD
+line. In this case, to run the flask app, all we need to write in `python3 iss_tracker.py` so the CMD command in this script is
+just that but in string form. The final command in the Dockerfile is the COPY command. This is another way of "importing" the
+file/script that we are going to be using, in this case, the iss tracker script. This command is usually found after the RUN 
+command and before the CMD command. It is important to note that the sequence of these commands is not by accident. The file is
+executed in order from top to bottom, so the order of the commands matters. First, we use python, then pip install all the 
+nesseccary libraries, then copy the file to be executed, and finally, execute the file. 
 
 
 ## docker-compose.yml script
 
-This script will automate the launch of the dockerfile and the flask app.  
+This script will automate the launch of the dockerfile and the flask app. Since our program is not too complicated and does not
+have a lot of moving peices, the docker-compose file is pretty simple. It is building the docker image by using the context
+in the DOckerfile. This is what the ./Dockerfile command is. It also takes in the ports that docker-compose will use to build
+the image. In this case, we are using a local port in our personal virtual machines so the port will simply be 5000. The 
+command in the docker-compose file is -5000:5000. Lastly, it will create the image and its name. The script has the unsername
+associated with DockerHub and the name of the file/image, which is iss_tracker.py. Since our program is only running one
+container, there is no need for a docker-config file which is why the volume section and the config file is commented out. If
+users of the program add to it and make it will more moving pieces, it would be customary to add a config.yml file to the 
+program folder.  
 
 
 

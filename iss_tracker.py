@@ -117,7 +117,7 @@ def get_speed_for_specif_epoch(epoch):
             calculate = (x_dot*x_dot)+(y_dot*y_dot)+(z_dot*z_dot)
             speed = math.sqrt(calculate)
             units = stateVector['X_DOT']['@units']
-            return (f'speed: {str(speed)} {units}')
+            return (f'speed: {str(speed)} {units}\n')
 
 
 
