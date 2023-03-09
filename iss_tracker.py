@@ -3,6 +3,8 @@
 import requests
 import math
 import xmltodict
+import time
+from geopy.geocoders import Nominatim
 
 from flask import Flask, request
 
@@ -130,22 +132,114 @@ def get_epoch_location(epoch):
     Returns:
         location (string): the location of the iss during the epoch interval.
     '''
+
     for stateVector in data:
         if epoch == stateVector["EPOCH"]:
 
-            # calcualate location of the specific epoch
+            
 
 
-            return location
+            x = stateVector['X']['#text']
+            x = float(x)
+            y = stateVector['Y']['#text']
+            y = float(y)
+            z = stateVector['Z']['#text']
+            z = float(z)
+
+            units = stateVector['Z']['@units']
+            mean_earth_radius = 6371000
+            hours = stateVector['EPOCH'][9:11]
+            hours = int(hours)
+            minutes = stateVector['EPOCH'][12:14]
+            minutes = int(minutes)
+
+            latitude = math.degrees(math.atan2(z, math.sqrt(x**2 + y**2)))
+            longitude = math.degrees(math.atan2(y, x)) - ((hours-12)+(minutes/60)) * (360/24) + 32
+            longitude = float(longitude)
+
+            if abs(longitude) > 180.0:
+                if longitude > 0:
+                    longitude = longitude - 180
+                    longitude = 180 - longitude
+                else:
+                    longitude = longitude + 180
+                    longitude = 180 + longitude 
 
 
+            altitude = math.sqrt(x**2 + y**2) - mean_earth_radius
+            geocoder = Nominatim(user_agent='iss_tracker')  
+            geolocation = geocoder.reverse((latitude, longitude), zoom=15, language='en')
+
+            # dict for location data
+            location_data = {}
+            location_data["longitude"] = longitude
+            location_data["latitude"] = latitude
+            location_data["altitude"] = {'value': altitude, 'units': units}
+
+            if geolocation == None:
+                location_data["geo"] = "geo location is unknown, perhaps it is over the ocean"
+                return location_data
+            else:
+                location_data['geo'] = geolocation.raw['address']
+                return location_data 
+
+
+def calculate_speed(epoch):
+    for stateVector in data:
+        if epoch == stateVector["EPOCH"]:
+
+
+            # initializing _dot values
+            x_dot = stateVector['X_DOT']['#text']
+            y_dot = stateVector['Y_DOT']['#text']
+            z_dot = stateVector['Z_DOT']['#text']
+
+            # type casting the values into floats
+            x_dot = float(x_dot)
+            y_dot = float(y_dot)
+            z_dot = float(z_dot)
+
+
+
+            # using formula provided to calculate speed
+            calculate = (x_dot*x_dot)+(y_dot*y_dot)+(z_dot*z_dot)
+            speed = math.sqrt(calculate)
+            units = stateVector['X_DOT']['@units']
+            return (f'speed: {str(speed)} {units}')
 
 @app.route('/now', methods=['GET'])
 def get_now():
     '''
     This function/route will return the latitude, longitude, geoposition, and the altitude of the iss at the current moment.
     '''
+    time_now = time.time()
+    epochs = get_all_epochs()
+    time_epoch = time.mktime(time.strptime(epochs[0][:-5], '%Y-%jT%H:%M:%S'))
+    minimum = time_now - time_epoch
 
+    count = 0
+
+    for epoch in epochs:
+        time_epoch = time.mktime(time.strptime(epoch[:-5], '%Y-%jT%H:%M:%S'))
+        difference = time_now - time_epoch
+
+        if abs(difference) < abs(minimum):
+            minimum = difference
+            near_epoch = epoch
+            epoch_count = count
+
+        count = count + 1
+
+    present_location = get_epoch_location(epoch_count)
+    present_speed = calculate_speed(epoch_count)
+
+    # dict of data for present time
+    present_data = {}
+    present_data['closest_epoch'] = near_epoch
+    present_data['seconds_from_present'] = minimum
+    present_data['location'] = present_location
+    present_speed['speed'] = present_speed
+    return present_data
 
 
 

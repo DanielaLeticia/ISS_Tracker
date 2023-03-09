@@ -9,5 +9,5 @@ services:
         ports:
                 -5000:5000
         image: danielasanchez/iss_tracker
-        volumes:
-            - ./config.yaml:/config.yaml #dash makes it a list (list of volumes)
+        #volumes:
+        #   - ./config.yaml:/config.yaml #dash makes it a list (list of volumes)
