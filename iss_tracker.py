@@ -238,7 +238,7 @@ def get_now():
     present_data['closest_epoch'] = near_epoch
     present_data['seconds_from_present'] = minimum
     present_data['location'] = present_location
-    present_speed['speed'] = present_speed
+    present_data['speed'] = present_speed
     return present_data
 
 

@@ -8,6 +8,6 @@ services:
             dockerfile: ./Dockerfile
         ports:
                 -5000:5000
-        image: danielasanchez/iss_tracker
+        image: danielasanchez/iss_tracker #using dockerhub username
         #volumes:
         #   - ./config.yaml:/config.yaml #dash makes it a list (list of volumes)
